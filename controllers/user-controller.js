@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const { User, Comment, Restaurant } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
+const helpers = require('../helpers/auth-helpers')
 
 const userController = {
   signUpPage: (req, res) => {
@@ -63,6 +64,10 @@ const userController = {
       .catch(err => next(err))
   },
   editUser: (req, res, next) => {
+    const currentUserId = helpers.getUser(req).id
+    const editUserId = Number(req.params.id)
+    console.log('Cannot edit others profile!')
+    if (currentUserId !== editUserId) throw new Error('Cannot edit others profile!')
     return User.findByPk(req.params.id, {
       raw: true,
       nest: true
@@ -74,7 +79,7 @@ const userController = {
       .catch(err => next(err))
   },
   putUser: (req, res, next) => {
-    const currentUserId = Number(req.user.id)
+    const currentUserId = Number(helpers.getUser(req).id)
     const editUserId = Number(req.params.id)
     if (currentUserId !== editUserId) throw new Error('Cannot edit others profile!')
     const { name } = req.body
